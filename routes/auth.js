@@ -31,6 +31,6 @@ router.put(
   authController.signup,
 );
 
-// Error handling middleware for validation errors
+router.post('/login', authController.login);
 
 module.exports = router;
