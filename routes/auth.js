@@ -20,9 +20,12 @@ router.put(
         }),
       ),
     body('password')
-      .isLength({ min: 5 })
-      .withMessage('Please enter a password with at least 5 characters')
-      .trim(),
+      .trim()
+      .isLength({ min: 8 })
+      .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[a-zA-Z\d@$.!%*#?&]/)
+      .withMessage(
+        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number',
+      ),
     body('name').not().isEmpty().withMessage('Please enter a name').trim(),
   ],
   authController.signup,

@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator'); // to validate the data
 const Post = require('../models/post'); // to import the post model
-const clearImage = require('../util/helper'); // to delete the image fileutil
+const clearImage = require('../utils/helper'); // to delete the image fileutil
 
 exports.getPosts = (req, res, next) => {
   const { page } = req.query || 1; // to get the page number from the query params
