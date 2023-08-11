@@ -18,7 +18,7 @@ exports.getPosts = (req, res, next) => {
       if (!posts) {
         const error = new Error('No posts found !');
         error.statusCode = 404;
-        throw error;
+        return next(error); // throw the error
       }
       res
         .status(200)
@@ -37,7 +37,7 @@ exports.getPost = (req, res, next) => {
       if (!post) {
         const error = new Error('Could not find the post !');
         error.statusCode = 404;
-        throw error;
+        return next(error); // throw the error
       }
       res.status(200).json({ message: 'Post fetched', post });
     })
@@ -52,12 +52,12 @@ exports.createPost = (req, res, next) => {
   if (!errors.isEmpty()) {
     const error = new Error('Validation failed, entered data is incorrect !');
     error.statusCode = 422;
-    throw error;
+    return next(error); // throw the error
   }
   if (!req.file) {
     const error = new Error('No image provided !');
     error.statusCode = 422;
-    throw error;
+    return next(error); // throw the error
   }
 
   const { title, content } = req.body;
@@ -86,7 +86,7 @@ exports.updatePost = (req, res, next) => {
   if (!errors.isEmpty()) {
     const error = new Error('Validation failed, entered data is incorrect !');
     error.statusCode = 422;
-    throw error;
+    return next(error); // throw the error
   }
   if (req.file) {
     imageUrl = req.file.path.replace('\\', '/');
@@ -94,14 +94,14 @@ exports.updatePost = (req, res, next) => {
   if (!imageUrl) {
     const error = new Error('No file picked !');
     error.statusCode = 422;
-    throw error;
+    return next(error); // throw the error
   }
   Post.findById({ _id: postId })
     .then((post) => {
       if (!post) {
         const error = new Error('Could not find the post !');
         error.statusCode = 404;
-        throw error;
+        return next(error); // throw the error
       }
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl, (err) => {
@@ -129,14 +129,14 @@ exports.deletePost = (req, res, next) => {
   if (!postId) {
     const error = new Error('No post found !');
     error.statusCode = 404;
-    throw error;
+    return next(error); // throw the error
   }
   Post.findById({ _id: postId })
     .then((post) => {
       if (!post) {
         const error = new Error('Could not find the post !');
         error.statusCode = 404;
-        throw error;
+        return next(error); // throw the error
       }
       clearImage(post.imageUrl, (err) => {
         if (err) {

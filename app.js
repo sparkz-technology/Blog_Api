@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid'); //uuid is a module that generates unique
 const multer = require('multer'); //multer is a middleware that parses multipart/form-data
 
 const feedRoutes = require('./routes/feed');
+const authRoutes = require('./routes/auth');
 
 const app = express(); //creating an express app
 app.use('/images', express.static(path.join(__dirname, 'images'))); //making the images folder static so that it can be accessed publicly
@@ -58,6 +59,7 @@ app.use(
 );
 // router middleware
 app.use('/feed', feedRoutes);
+app.use('/auth', authRoutes);
 
 app.use((error, req, res, next) => {
   //error handling middleware
