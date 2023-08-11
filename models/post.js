@@ -1,5 +1,8 @@
+/* eslint-disable prefer-destructuring */
 const mongoose = require('mongoose'); //import mongoose
+
 const Schema = mongoose.Schema; //create schema
+
 const postSchema = new Schema(
   {
     title: {

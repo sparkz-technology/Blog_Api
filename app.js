@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
     cb(null, 'images');
   },
   filename: function (req, file, cb) {
-    cb(null, uuidv4() + '-' + file.originalname);
+    cb(null, `${uuidv4()}-${file.originalname}`);
   },
 });
 
@@ -61,10 +61,9 @@ app.use('/feed', feedRoutes);
 
 app.use((error, req, res, next) => {
   //error handling middleware
-  console.log(error);
   const status = error.statusCode || 500; //if the error has a status code then use that otherwise use 500
-  const message = error.message; //error message
-  const data = error.data; //error data
+  const { message } = error; //error message
+  const { data } = error; //error data
   res.status(status).json({ message: message, data: data }); //sending the response
   next();
 });
