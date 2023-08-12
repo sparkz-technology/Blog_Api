@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 require('dotenv').config(); //dotenv is a module that loads environment variables from a .env file into process.env
 const path = require('path'); //path is a module that provides utilities for working with file and directory paths
 const express = require('express'); //express is a framework for node.js
@@ -20,6 +21,7 @@ const corsOptions = {
 app.use(cors(corsOptions)); //using cors middleware
 
 app.use(bodyParser.json()); //bodyParser.json()s parses the body of the request and only looks at json data
+app.use(bodyParser.urlencoded({ extended: true })); //bodyParser.urlencoded() parses the body of the request and looks at url encoded data
 
 if (process.env.NODE_ENV === 'development') {
   //if the environment is development then use morgan

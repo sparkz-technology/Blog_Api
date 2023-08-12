@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator'); // to validate the data
 const Post = require('../models/post'); // to import the post model
+const User = require('../models/user'); // to import the user model
 const clearImage = require('../utils/helper'); // to delete the image fileutil
 
 exports.getPosts = (req, res, next) => {
@@ -50,10 +51,19 @@ exports.getPost = (req, res, next) => {
 exports.createPost = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    if (req.file) {
+      const imageUrl = req.file.path.replace('\\', '/');
+      clearImage(imageUrl, (err) => {
+        if (err) {
+          throw err; // throw the error
+        }
+      });
+    }
     const error = new Error('Validation failed, entered data is incorrect !');
     error.statusCode = 422;
     throw error; // throw the error
   }
+
   if (!req.file) {
     const error = new Error('No image provided !');
     error.statusCode = 422;
@@ -61,17 +71,34 @@ exports.createPost = (req, res, next) => {
   }
 
   const { title, content } = req.body;
+
   const imageUrl = req.file.path.replace('\\', '/');
+  let creator;
   const post = new Post({
     title,
     content,
     imageUrl: imageUrl,
-    creator: { name: 'Sparkz' },
+    creator: req.userId,
   });
   post
     .save()
+    .then(() => User.findById({ _id: req.userId }))
+    .then((user) => {
+      if (!user) {
+        const error = new Error('Could not find the user !');
+        error.statusCode = 404;
+        throw error; // throw the error
+      }
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
     .then((result) => {
-      res.status(201).json({ message: 'Post created !', post: result });
+      res.status(201).json({
+        message: 'Post created !',
+        post: post,
+        creator: { _id: creator._id, name: creator.name },
+      });
     })
     .catch((err) => {
       if (!err.statusCode) err.statusCode = 500;
@@ -84,6 +111,14 @@ exports.updatePost = (req, res, next) => {
   let imageUrl = req.body.image;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    if (req.file) {
+      const imageUrlUpdate = req.file.path.replace('\\', '/');
+      clearImage(imageUrlUpdate, (err) => {
+        if (err) {
+          throw err; // throw the error
+        }
+      });
+    }
     const error = new Error('Validation failed, entered data is incorrect !');
     error.statusCode = 422;
     throw error; // throw the error
