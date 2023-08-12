@@ -5,16 +5,15 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 exports.signup = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error('Validation failed.');
-    error.statusCode = 422;
-    error.data = errors.array();
-    throw error;
-  }
-
   const { email, name, password } = req.body;
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation failed.');
+      error.statusCode = 422;
+      error.data = errors.array();
+      throw error;
+    }
     const hashedPw = await bcrypt.hash(password, 12);
     const user = new User({
       email: email,
@@ -53,8 +52,7 @@ exports.login = async (req, res, next) => {
         email: loadedUser.email,
         userId: loadedUser._id.toString(),
       },
-      'somesupersecretsecret',
-      { expiresIn: '1h' },
+      process.env.JWT_SECRET,
     );
     res.status(200).json({ token: token, userId: loadedUser._id.toString() });
   } catch (err) {
