@@ -12,6 +12,7 @@ exports.getPosts = (req, res, next) => {
     .then((count) => {
       totalItems = count;
       return Post.find()
+        .populate('creator') // to populate the creator field with the user data
         .skip((page - 1) * perPage)
         .limit(perPage);
     })
@@ -138,6 +139,11 @@ exports.updatePost = (req, res, next) => {
         error.statusCode = 404;
         throw error; // throw the error
       }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error('Not authorized !');
+        error.statusCode = 403;
+        throw error; // throw the error
+      }
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl, (err) => {
           if (err) {
@@ -173,6 +179,11 @@ exports.deletePost = (req, res, next) => {
         error.statusCode = 404;
         throw error; // throw the error
       }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error('Not authorized !');
+        error.statusCode = 403;
+        throw error; // throw the error
+      }
       clearImage(post.imageUrl, (err) => {
         if (err) {
           throw err; // throw the error
@@ -180,9 +191,16 @@ exports.deletePost = (req, res, next) => {
       });
       return Post.deleteOne({ _id: postId });
     })
-    .then((result) => {
-      res.status(200).json({ message: 'Post deleted !' });
+    // .then((result) => return User.findById({ _id: req.userId }))
+    .then(() => User.findById({ _id: req.userId }))
+    .then((user) => {
+      user.posts.pull(postId);
+      return user.save(); // Save the updated user document
     })
+    .then((updatedUser) => {
+      res.status(200).json({ message: 'Post deleted !', user: updatedUser });
+    })
+
     .catch((err) => {
       if (!err.statusCode) err.statusCode = 500;
       next(err);
