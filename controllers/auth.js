@@ -6,8 +6,8 @@ const User = require('../models/user');
 
 exports.signup = async (req, res, next) => {
   const { email, name, password } = req.body;
+  const errors = validationResult(req);
   try {
-    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const error = new Error('Validation failed.');
       error.statusCode = 422;
@@ -82,7 +82,14 @@ exports.getUserStatus = async (req, res, next) => {
 
 exports.updateUserStatus = async (req, res, next) => {
   const newStatus = req.body.status;
+  const errors = validationResult(req);
   try {
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation failed.');
+      error.statusCode = 422;
+      error.data = errors.array();
+      throw error;
+    }
     const user = await User.findById(req.userId);
     if (!user) {
       const error = new Error('User not found.');
