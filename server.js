@@ -1,5 +1,8 @@
+/* eslint-disable global-require */
+/* eslint-disable no-console */
 require('dotenv').config(); // import dotenv
 const mongoose = require('mongoose'); //mongoose is a module that allows us to interact with mongodb
+// in client side install socket.io-client
 const app = require('./app');
 
 const port = process.env.PORT; // port 8000
@@ -11,9 +14,13 @@ async function connect() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    app.listen(port, () => console.log(`Server listening on port ${port}!`)); // app is listening on port 8000
+    const server = app.listen(port); // app is listening on port 8000
+    const io = require('./socket').init(server); // socket.io is initialized
+    io.on('connection', () => {
+      console.log('Client connected');
+    });
   } catch (error) {
-    console.log(error);
+    console.warn(error);
   }
 }
 connect();
